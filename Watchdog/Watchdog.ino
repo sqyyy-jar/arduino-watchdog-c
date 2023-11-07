@@ -13,8 +13,10 @@ const byte echo_pin_2 = 43;
 const byte num_digits = 4; // Amount of digits
 const byte digit_pins[4] = {2, 3, 4, 5}; // Pins for digits
 const byte segment_pins[8] = {6, 7, 8, 9, 10, 11, 12, 13}; // Pins for segments
+// LED
+const byte led_pin = 20;
 
-SevSeg sevseg;
+SevSeg sevseg; // 7 Segment Display
 float base_distance_1;
 float base_distance_2;
 unsigned long previous_1 = 0;
@@ -44,20 +46,22 @@ void loop() {
     unsigned long time = millis();
     if (active_1) {
         previous_1 = time;
-    }
-    if (active_2) {
+    } else if (active_2) {
         previous_2 = time;
     }
     // Person left room
     if (active_1 && time - previous_2 <= timeout) {
         --people_inside;
+        previous_2 = 0;
         Serial.println("-");
     }
     // Person entered room
     else if (active_2 && time - previous_1 <= timeout) {
         ++people_inside;
         ++people_entered;
+        previous_1 = 0;
         Serial.println("+");
+        digitalWrite(led_pin, !digitalRead(led_pin));
     }
     display(people_entered);
 }
